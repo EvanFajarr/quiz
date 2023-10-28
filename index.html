@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Pengetahuan Umum</title>
+    <!-- Tambahkan link Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+    <!-- Tambahkan CSS tambahan -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        .btn-primary {
+            font-size: 18px;
+            padding: 10px 20px;
+        }
+
+        .question-label {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .answer-input {
+            width: 100%;
+            font-size: 18px;
+        }
+
+        #result {
+            margin-top: 10px;
+        }
+
+        .final-score {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        .alert {
+            margin-top: 10px;
+        }
+
+        #startScreen {
+        text-align: center;
+        max-width: 400px;
+        margin: auto;
+    }
+
+    #startScreen input {
+        margin-bottom: 10px;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+       
+        <div id="startScreen">
+            <h1>Selamat Datang di Kuis Pengetahuan Umum</h1>
+            <label for="username">Masukkan Nama Anda:</label>
+            <input type="text" id="username" class="form-control" required>
+            <button type="button" class="btn btn-primary" onclick="startQuiz()">Mulai Kuis</button>
+        </div>
+  
+
+        <!-- Modal -->
+        <div class="modal fade" id="questionModal" tabindex="-1" role="dialog" aria-labelledby="questionModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="questionModalLabel">Pertanyaan</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="question">
+                            <label class="question-label" id="questionLabel"></label>
+                            <input type="text" id="answerInput" class="form-control answer-input" required>
+                        </div>
+                        <div id="result"></div> <!-- Menambahkan elemen untuk menampilkan hasil -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                        <button type="button" class="btn btn-primary" onclick="checkAnswer()">Kirim Jawaban</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Elemen untuk menampilkan nilai akhir -->
+        <div id="finalScore" class="d-none final-score">
+            <h3>Nilai Akhir</h3>
+            <p id="scoreText"></p>
+        </div>
+    </div>
+
+    <!-- Tambahkan link Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+      const questions = [
+    { question: "Hallo, [username]! Apa ibukota Indonesia?", answer: "Jakarta" },
+    { question: "Hallo, [username]! Berapakah 5 + 3?", answer: "8" },
+    { question: "Hallo, [username]! Siapakah presiden pertama Indonesia?", answer: "Soekarno" },
+    { question: "Hallo, [username]! Apa nama planet terdekat dari Matahari?", answer: "Merkurius" },
+    { question: "Hallo, [username]! Berapakah akar dari 25?", answer: "5" },
+    { question: "Hallo, [username]! Siapakah penemu teori relativitas?", answer: "Albert Einstein" },
+    { question: "Hallo, [username]! Apakah bahasa resmi di Jepang?", answer: "Jepang" },
+    { question: "Hallo, [username]! Berapa jumlah provinsi di Indonesia?", answer: "34" },
+    { question: "Hallo, [username]! Siapa penulis drama Romeo dan Juliet?", answer: "William Shakespeare" },
+    { question: "Hallo, [username]! Apa singkatan dari Organisasi Negara-negara Pengekspor Minyak?", answer: "OPEC" },
+    { question: "Hallo, [username]! Berapakah 2 pangkat 3?", answer: "8" },
+    { question: "Hallo, [username]! Apakah simbol kimia untuk air?", answer: "H2O" },
+    { question: "Hallo, [username]! Siapa pencipta teori gravitasi?", answer: "Isaac Newton" },
+    { question: "Hallo, [username]! Apa nama ilmuwan terkenal dari Italia yang dikenal sebagai bapak astronomi modern?", answer: "Galileo Galilei" }
+];
+
+// ... Kode JavaScript lainnya ...
+
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let username;
+        function startQuiz() {
+    username = $('#username').val();
+    if (!username) {
+        alert("Silakan masukkan nama Anda.");
+        return;
+    }
+
+    $('#startScreen').hide();
+    $('#questionModal').modal('show');
+    showQuestion();
+}
+
+        function showQuestion() {
+          const currentQuestion = questions[currentQuestionIndex];
+    const formattedQuestion = currentQuestion.question.replace("[username]", username);
+    $('#questionLabel').text(formattedQuestion);
+    $('#answerInput').val('');
+    $('#result').html('');
+        }
+
+        function checkAnswer() {
+    const userAnswer = $('#answerInput').val().toLowerCase().trim();
+    const correctAnswer = questions[currentQuestionIndex].answer.toLowerCase();
+    const resultElement = $('#result');
+
+    if (!userAnswer) {
+        resultElement.html("<div class='alert alert-warning' role='alert'>Silakan jawab terlebih dahulu.</div>");
+        return; // Menghentikan pengecekan jika jawaban kosong
+    }
+
+    if (userAnswer === correctAnswer) {
+        resultElement.html("<div class='alert alert-success animated bounceIn' role='alert'>Jawaban benar!</div>");
+        score++;
+    } else {
+        resultElement.html("<div class='alert alert-danger animated shake' role='alert'>Jawaban salah. Coba lagi.</div>");
+    }
+
+    currentQuestionIndex++;
+    
+    if (currentQuestionIndex < questions.length) {
+        setTimeout(showQuestion, 1000); // Menampilkan pertanyaan berikutnya setelah 1 detik
+    } else {
+        showFinalScore();
+    }
+}
+
+
+        function showFinalScore() {
+            $('#questionModal').modal('hide');
+            const finalScoreElement = $('#finalScore');
+            
+        finalScoreElement.removeClass('d-none');
+        finalScoreElement.find('#scoreText').text(`Skor Akhir Anda ${score} dari ${questions.length}`);
+        }
+    </script>
+</body>
+</html>
